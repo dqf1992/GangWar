@@ -36,11 +36,11 @@ public class homework {
 //		for(String state: boardState) {
 //			System.out.println(state);
 //		}
-		
-//		PrintWriter writer = new PrintWriter("output.txt", "UTF-8");
-//		for(String s: Modes.selectMode(mode, youplay, depth, boardValue, boardState)) {
-//			writer.println(s);
-//		}
-//		writer.close();
+		Modes modes = new Modes(mode, youplay, depth, boardValue, boardState);
+		PrintWriter writer = new PrintWriter("output.txt", "UTF-8");
+		for(String s: modes.selectMode()) {
+			writer.println(s);
+		}
+		writer.close();
 	}
 }
