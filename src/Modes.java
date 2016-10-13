@@ -32,7 +32,6 @@ public class Modes {
 		int ov;
 		String ma = "";
 		for(String a:actions(state, youplay)) {
-			System.out.println(a);
 			ov = v;
 			v = Math.max(v, minValue(result(state, a), depth));
 			if(v > ov) {
@@ -160,28 +159,71 @@ public class Modes {
 		return util;
 	}
 	
-	public String alphaBeta() {
-		return null;
+	public String alphaBetaSearch() {
+		char[][] state = this.initState;
+		int depth = 0;
+		int v = Integer.MIN_VALUE;
+		int ov;
+		String ma = "";
+		int alpha = Integer.MIN_VALUE;
+		int beta = Integer.MAX_VALUE;
+		for(String a:actions(state, youplay)) {
+			ov = v;
+			v = Math.max(v, minValue(result(state, a), depth, alpha, beta));
+			if(v > ov) ma = a;
+			if(v >= beta) return a;
+			alpha = Math.max(alpha, v);
+		}
+		return ma;
 	}
 	
+	private int maxValue(char[][] state, int depth, int alpha, int beta) {
+		if(++depth == depthLimit) return utility(state);
+		int v = Integer.MIN_VALUE;
+		for(String a:actions(state, youplay)) {
+			v = Math.max(v, minValue(result(state,a), depth, alpha, beta));
+			if(v >= beta) return v;
+			alpha = Math.max(alpha, v);
+		}
+		return v;
+	}
+
+	private int minValue(char[][] state, int depth, int alpha, int beta) {
+		if(++depth == depthLimit) return utility(state);
+		int v = Integer.MAX_VALUE;
+		for(String a: actions(state, otherplay)) {
+			v = Math.min(v, maxValue(result(state,a), depth, alpha, beta));
+			if(v <= alpha) return v;
+			beta = Math.min(beta, v);
+		}
+		return v;
+	}
+
 	public String[] selectMode() {
 		String[] out = new String[boardValue.length + 1];
-		String action;
+		String action = " ";
 		if(mode.equals("MINIMAX")) {
 			action = minimaxDecision();
-			String[] actionArr = action.split(" ");
-			out[0] = actionArr[1] + " " + actionArr[0];
-			char[][] res = result(this.initState, action);
-			for(int i=1; i<out.length; i++) {
-				out[i] = new String(res[i-1]);
-			}
-			return out;
 		} else if(mode.equals("ALPHABETA")) {
-			action = alphaBeta();
-			return null;
+			action = alphaBetaSearch();
 		} else if(mode.equals("COMPETITION")) {
 			return null;
 		}
-		return null;
+		String[] actionArr = action.split(" ");
+		out[0] = actionArr[1] + " " + actionArr[0];
+		char[][] res = result(this.initState, action);
+		for(int i=1; i<out.length; i++) {
+			out[i] = new String(res[i-1]);
+		}
+		return out;
+	}
+	
+	public void printBoard(char[][] state) {
+		for(int i=0; i<boardSize; i++) {
+			for(int j=0; j<boardSize; j++) {
+				System.out.print(state[i][j]);
+			}
+			System.out.println();
+		}
 	}
 }

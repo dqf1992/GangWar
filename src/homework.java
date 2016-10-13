@@ -38,8 +38,12 @@ public class homework {
 //		}
 		Modes modes = new Modes(mode, youplay, depth, boardValue, boardState);
 		PrintWriter writer = new PrintWriter("output.txt", "UTF-8");
-		for(String s: modes.selectMode()) {
-			writer.println(s);
+		String[] out = modes.selectMode();
+		for(int i=0; i<out.length; i++) {
+			writer.print(out[i]);
+			if(i != out.length - 1) {
+				writer.println();
+			}
 		}
 		writer.close();
 	}
