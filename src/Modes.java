@@ -8,7 +8,7 @@ public class Modes {
 	char otherplay;
 	int depthLimit;
 	int[][] boardValue;
-	char[][] initState;
+	private final char[][] initState;
 	int boardSize;
 
 	public Modes(String mode, char youplay, int depthLimit, int[][] boardValue, String[] boardState) {
@@ -81,7 +81,7 @@ public class Modes {
 					int nRow, nCol;
 					boolean existU = false;
 					boolean existO = false;
-					char oplay = uplay == youplay? otherplay: youplay; 
+					char oplay = (uplay == youplay? otherplay: youplay); 
 					StringBuilder sb = new StringBuilder();
 					for(int[] dir:dirs) {
 						nRow = row + dir[0];
@@ -127,13 +127,21 @@ public class Modes {
 		int col, row;
 		if(a[0].equals("Stake")) {
 			col = (int) (a[1].charAt(0) - 'A');
-			row = (int) (a[1].charAt(1) - '1');
+			row = (int) (a[1].charAt(1) - '0');
+			if(a[1].length() == 3) {
+				row = row * 10 + (int) (a[1].charAt(2) - '0');
+			} 
+			row --;
 			stateCopy[row][col] = a[2].charAt(0);
 		} else if(a[0].equals("Raid")) {
 			int i = 1;
 			while(i<a.length-1) {
 				col = (int) (a[i].charAt(0) - 'A');
-				row = (int) (a[i].charAt(1) - '1');
+				row = (int) (a[i].charAt(1) - '0');
+				if(a[i].length() == 3) {
+					row = row * 10 + (int) (a[i].charAt(2) - '0');
+				}
+				row --;
 				stateCopy[row][col] = a[a.length-1].charAt(0);
 				i++;
 			}

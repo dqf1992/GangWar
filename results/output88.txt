@@ -1,5 +1,5 @@
 G9 Raid
-.X...XXXX.XO.X
+.X...X.XX.XO.X
 .XOOX...X..X.X
 XO.OO.XOOXXXO.
 .OO...XOXX.O.X
@@ -8,7 +8,7 @@ X.O.XX..OXX..O
 .X...X.XXXX...
 ..O.XXXX.O.OX.
 .....XXX.O.O..
-XX.O..O..O...X
+XX.O..X..O...X
 ...XOX..XX..X.
 X.OXXOXO..XO.X
 OX..XO..XOOX..

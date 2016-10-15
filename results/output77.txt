@@ -1,5 +1,5 @@
-I10 Raid
-OOO..XOOOOXX
+D11 Raid
+OOO..XO..OXX
 .XXXOOXO...O
 ...XOOX.OXO.
 XOX.........
@@ -7,7 +7,7 @@ XOX.........
 ..X....O..O.
 O.X.XXOXXO.X
 OOX.OXOXO..X
-..O...OOOX.O
+..O...OOXX.O
 ..XO.O.X.O..
-.OX.XX.....X
+.OOOOX.....X
 OO..O..OXXXO
