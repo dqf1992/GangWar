@@ -19,4 +19,4 @@ for i in xrange(1,11):
     os.system('diff ./output.txt ./cases/output{0}.txt'.format(i))
     os.system('cp ./output.txt ./results/output{0}.txt'.format(i))
 
-os.system('rm input.txt output.txt *.java *.class')
+os.system('rm input.txt output.txt')

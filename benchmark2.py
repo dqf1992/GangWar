@@ -10,6 +10,7 @@ os.system('cp src/*.java .')
 os.system('javac homework.java')
 for i in xrange(100):
     os.system('cp ./testcases/{0}.in ./input.txt'.format(i))
+    os.system('cp ./input.txt ./results/input{0}.txt'.format(i))
     print("-->On test case #{0}<--".format(i))
     start_time = time.time();
     os.system('java homework > /dev/null')

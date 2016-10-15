@@ -1,9 +1,0 @@
-E3 Raid
-XO......
-XX..X...
-O..XXX..
-...OXX.X
-X.XOX.X.
-O..OOO..
-.OO....O
-..O.X..X

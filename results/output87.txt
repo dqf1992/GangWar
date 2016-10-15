@@ -1,8 +1,0 @@
-B2 Raid
-X..XO.X
-XX..XX.
-XX..OOO
-OX..X..
-..X.O.X
-X......
-.X.O.O.

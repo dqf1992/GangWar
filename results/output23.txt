@@ -1,8 +1,0 @@
-D1 Raid
-.OXXXXO
-XOXXO..
-..X.XOO
-XOX..O.
-.OO.OOX
-O.XXOX.
-.X.OO..
