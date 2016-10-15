@@ -30,7 +30,7 @@ public class Modes {
 		int depth = 0;
 		int v = Integer.MIN_VALUE;
 		int ov;
-		String ma = "";
+		String ma = null;
 		for(String a:actions(state, youplay)) {
 			ov = v;
 			v = Math.max(v, minValue(result(state, a), depth));
@@ -42,7 +42,8 @@ public class Modes {
 	}
 	
 	private int maxValue(char[][] state, int depth) {
-		if(++depth == depthLimit) return utility(state);
+		depth++;
+		if(terminalTest(state, depth)) return utility(state);
 		int v = Integer.MIN_VALUE;
 		for(String a:actions(state, youplay)) {
 			v = Math.max(v, minValue(result(state, a), depth));
@@ -51,63 +52,60 @@ public class Modes {
 	}
 	
 	private int minValue(char[][] state, int depth) {
-		System.out.println("depth = " + (depth+1));
-		for(int i=0; i<boardSize; i++) {
-			for(int j=0; j<boardSize; j++) {
-				System.out.print(state[i][j]);
-			}
-			System.out.println();
-		}
-		if(++depth == depthLimit) return utility(state);
+		depth++;
+		if(terminalTest(state, depth)) return utility(state);
 		int v = Integer.MAX_VALUE;
 		for(String a:actions(state, otherplay)) {
-			System.out.println(a);
 			v = Math.min(v, maxValue(result(state, a), depth));
 		}
 		return v;
 	}
 	
-	private List<String> actions(char[][] state, char play) {
+	private List<String> actions(char[][] state, char uplay) {
 		// brute force all stake moves
 		List<String> moves = new ArrayList<>();
 		for(int row=0; row < boardSize; row++) {
 			for(int col=0; col < boardSize; col++) {
 				if(state[row][col] == '.') {
 					char colIdx = (char) (col + 'A');
-					String s = new String("Stake " + colIdx + (row+1) + " " + play);
+					String s = new String("Stake " + colIdx + (row+1) + " " + uplay);
 					moves.add(s);
 				}
 			}
 		}
-		// calculate all raid move
+		// calculate all raid moves
 		int[][] dirs = {{-1,0},{1,0},{0,-1},{0,1}};
 		for(int row=0; row < boardSize; row++) {
-			for(int col=0; col< boardSize; col++) {
-				if(state[row][col] == play) {
-					int uRow, uCol, oRow, oCol;
+			for(int col=0; col < boardSize; col++) {
+				if(state[row][col] == '.') {
+					int nRow, nCol;
+					boolean existU = false;
+					boolean existO = false;
+					char oplay = uplay == youplay? otherplay: youplay; 
+					StringBuilder sb = new StringBuilder();
 					for(int[] dir:dirs) {
-						uRow = row + dir[0];
-						uCol = col + dir[1];
-						if(checkBounds(uRow, uCol) && state[uRow][uCol] == '.') {
-							StringBuilder sb = new StringBuilder();
-							char oplay = (play == youplay ? otherplay: youplay);
-							for(int[] oDir: dirs) {
-								oRow = uRow + oDir[0];
-								oCol = uCol + oDir[1];
-								if(checkBounds(oRow, oCol) && state[oRow][oCol] == oplay) {
-									if(sb.length() == 0) {
-										char uColIdx = (char) (uCol + 'A');
-										sb.append("Raid " + uColIdx + (uRow+1));
-									}
-									char oColIdx = (char) (oCol + 'A');
-									sb.append(" " + oColIdx + (oRow+1));
-								}
-							}
-							if(sb.length() != 0) {
-								sb.append(" " + play);
-								moves.add(sb.toString());
+						nRow = row + dir[0];
+						nCol = col + dir[1];
+						if(!checkBounds(nRow, nCol)) continue;
+						if(state[nRow][nCol] == uplay) {
+							existU = true;
+						} else if(state[nRow][nCol] == oplay) {
+							existO = true;
+						}
+					}
+					if(existU && existO) {
+						char colIdx = (char) (col + 'A');
+						sb.append("Raid " + colIdx + (row+1));
+						for(int[] dir: dirs) {
+							nRow = row + dir[0];
+							nCol = col + dir[1];
+							if(checkBounds(nRow, nCol) && state[nRow][nCol] == oplay) {
+								char nColIdx = (char) (nCol + 'A');
+								sb.append(" " + nColIdx + (nRow+1));
 							}
 						}
+						sb.append(" " + uplay);
+						moves.add(sb.toString());
 					}
 				}
 			}
@@ -164,7 +162,7 @@ public class Modes {
 		int depth = 0;
 		int v = Integer.MIN_VALUE;
 		int ov;
-		String ma = "";
+		String ma = null;
 		int alpha = Integer.MIN_VALUE;
 		int beta = Integer.MAX_VALUE;
 		for(String a:actions(state, youplay)) {
@@ -178,7 +176,8 @@ public class Modes {
 	}
 	
 	private int maxValue(char[][] state, int depth, int alpha, int beta) {
-		if(++depth == depthLimit) return utility(state);
+		depth++;
+		if(terminalTest(state, depth)) return utility(state);
 		int v = Integer.MIN_VALUE;
 		for(String a:actions(state, youplay)) {
 			v = Math.max(v, minValue(result(state,a), depth, alpha, beta));
@@ -189,7 +188,8 @@ public class Modes {
 	}
 
 	private int minValue(char[][] state, int depth, int alpha, int beta) {
-		if(++depth == depthLimit) return utility(state);
+		depth++;
+		if(terminalTest(state, depth)) return utility(state);
 		int v = Integer.MAX_VALUE;
 		for(String a: actions(state, otherplay)) {
 			v = Math.min(v, maxValue(result(state,a), depth, alpha, beta));
@@ -198,10 +198,23 @@ public class Modes {
 		}
 		return v;
 	}
+	
+	private boolean terminalTest(char[][] state, int depth) {
+		boolean hasSpace = false;
+		for(int i=0; i<boardSize; i++) {
+			for(int j=0; j<boardSize; j++) {
+				if(state[i][j] == '.') {
+					hasSpace = true;
+				}
+			}
+		}
+		return !hasSpace || (depth == depthLimit);
+		
+	}
 
 	public String[] selectMode() {
 		String[] out = new String[boardValue.length + 1];
-		String action = " ";
+		String action = null;
 		if(mode.equals("MINIMAX")) {
 			action = minimaxDecision();
 		} else if(mode.equals("ALPHABETA")) {
@@ -209,6 +222,7 @@ public class Modes {
 		} else if(mode.equals("COMPETITION")) {
 			return null;
 		}
+		if(action == null) return null;
 		String[] actionArr = action.split(" ");
 		out[0] = actionArr[1] + " " + actionArr[0];
 		char[][] res = result(this.initState, action);
@@ -216,14 +230,5 @@ public class Modes {
 			out[i] = new String(res[i-1]);
 		}
 		return out;
-	}
-	
-	public void printBoard(char[][] state) {
-		for(int i=0; i<boardSize; i++) {
-			for(int j=0; j<boardSize; j++) {
-				System.out.print(state[i][j]);
-			}
-			System.out.println();
-		}
 	}
 }

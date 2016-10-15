@@ -1,0 +1,14 @@
+G4 Raid
+....XX.O.O..O
+OOO.XXOOO..OO
+...O..XX...X.
+...OXXXX.....
+..O.XXX.XOX..
+OOO....OO.OXO
+.......XX.O..
+XX.O..XXXXO.X
+.XXX....X...O
+..OOX..OOXOXO
+XXXX..X..X..O
+.OXOXOX..XOO.
+.O.O..XX..X.X

@@ -6,9 +6,9 @@ import time
 
 os.system('rm -rf results')
 os.system('mkdir -p results')
-os.system('rm *.java')
+os.system('rm *.java > /dev/null')
 os.system('cp src/*.java .')
-os.system('rm *.class');
+os.system('rm *.class > /dev/null');
 os.system('javac homework.java')
 for i in xrange(1,11):
     os.system('cp ./cases/input{0}.txt ./input.txt'.format(i))
