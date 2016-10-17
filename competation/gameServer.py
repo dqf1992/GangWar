@@ -32,13 +32,16 @@ def determineWinner(data, boardSize):
 				val -= int(num[j]);
 	print("");
 	if val > 0:
-		print('X win by ' + str(val));
+		result = 'X win by ' + str(val) + ' of boardSize' + str(boardSize);
 	elif val < 0:
-		print('O win by ' + str(-val));
+		result = 'O win by ' + str(-val) + ' of boardSize' + str(boardSize);
 	else:
-		print('Game draw');
+		result = 'Game draw of boardSize' + str(boardSize);
+	print(result);
+	os.chdir(currDir);
+	os.system('echo ' + result + ' >> res.log');
 
-for i in xrange(1):
+for i in xrange(10):
 	fileName = "input" + str(i) + ".txt";
 	# with open(fileName, 'r') as fin:
 	# 	print fin.read();
@@ -71,9 +74,12 @@ for i in xrange(1):
 			break;
 		if timeRemain < 0:
 			if player == player1:
-				print(player1 + ' run out of time, winner is ' + player2);
+				result = player1 + ' run out of time, winner is ' + player2 + ' of boardSize' + str(boardSize);
 			else:
-				print(player2 + ' run out of time, winner is ' + player1);
+				result = player2 + ' run out of time, winner is ' + player1 + ' of boardSize' + str(boardSize);
+			print(result);
+			os.system('echo ' + result + ' >> res.log');
+			os.chdir(currDir);
 			break;
 		with open('input.txt', 'w') as fin:
 			fin.writelines(data);
@@ -100,7 +106,7 @@ for i in xrange(1):
 		
 
 		timeRemain = timeRemain - timeCPU;
-		print(timeRemain);
+		print('\ntime remains for ' + player + ' is ' + str(timeRemain));
 
 		# sys.stdout.write(log[1].split('\t')[0]);
 		
@@ -126,7 +132,8 @@ for i in xrange(1):
 			os.chdir(player1Dir);
 			timeRemain2 = timeRemain;
 			timeRemain = timeRemain1;
-
+os.chdir(currDir);
+os.system('cat res.log');
 os.chdir(player1Dir);
 os.system('make clean');
 os.chdir(player2Dir);

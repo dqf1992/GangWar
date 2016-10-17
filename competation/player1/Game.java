@@ -13,6 +13,8 @@ public class Game {
 	int moveRemain;
 	double avgMoveTime;
 	double processRate;
+	int branchingFactor;
+	double branchLimit;
 	
 	public Game(char youplay, int depthLimit, double timeRemain, int[][] boardValue, String[] boardState) {
 		this.plays = new char[]{'X','O'};
@@ -36,8 +38,10 @@ public class Game {
 		}
 		processRate = moveRemain / (boardSize * boardSize);
 		processRate = 1 - processRate;
+		branchingFactor = moveRemain;
 		moveRemain = moveRemain/2;
 		avgMoveTime = timeRemain/moveRemain;
+		branchLimit = 4000000.0;
 	}
 	
 	private String minimaxDecision() {
@@ -78,16 +82,21 @@ public class Game {
 	
 	private List<String> actions(char[][] state, char uplay) {
 		// brute force all stake moves
-		int[][] dirs = {{-1,0},{1,0},{0,-1},{0,1}};
 		List<String> moves = new ArrayList<>();
-		List<String> raidMoves = new ArrayList<>();
 		for(int row=0; row < boardSize; row++) {
 			for(int col=0; col < boardSize; col++) {
 				if(state[row][col] == '.') {
 					char colIdx = (char) (col + 'A');
 					String s = new String("Stake " + colIdx + (row+1) + " " + uplay);
 					moves.add(s);
-					// calculate all raid moves
+				}
+			}
+		}
+		// calculate all raid moves
+		int[][] dirs = {{-1,0},{1,0},{0,-1},{0,1}};
+		for(int row=0; row < boardSize; row++) {
+			for(int col=0; col < boardSize; col++) {
+				if(state[row][col] == '.') {
 					int nRow, nCol;
 					boolean existU = false;
 					boolean existO = false;
@@ -104,7 +113,7 @@ public class Game {
 						}
 					}
 					if(existU && existO) {
-						colIdx = (char) (col + 'A');
+						char colIdx = (char) (col + 'A');
 						sb.append("Raid " + colIdx + (row+1));
 						for(int[] dir: dirs) {
 							nRow = row + dir[0];
@@ -115,13 +124,69 @@ public class Game {
 							}
 						}
 						sb.append(" " + uplay);
-						raidMoves.add(sb.toString());
+						moves.add(sb.toString());
 					}
 				}
 			}
 		}
-		moves.addAll(raidMoves);
 		return moves;
+	}
+	
+	private List<String> actionsCmp(char[][] state, char uplay) {
+		
+		// calculate all raid moves
+		
+		List<String> stakeMoves = new ArrayList<>();
+		List<String> raidMoves = new ArrayList<>();
+		for(int row=0; row < boardSize; row++) {
+			for(int col=0; col < boardSize; col++) {
+				if(state[row][col] == '.') {
+					char colIdx = (char) (col + 'A');
+					String s = new String("Stake " + colIdx + (row+1) + " " + uplay);
+					stakeMoves.add(s);
+				}
+			}
+		}
+		int[][] dirs = {{-1,0},{1,0},{0,-1},{0,1}};
+		for(int row=0; row < boardSize; row++) {
+			for(int col=0; col< boardSize; col++) {
+				if(state[row][col] == uplay) {
+					int uRow, uCol, oRow, oCol;
+					for(int[] dir:dirs) {
+						uRow = row + dir[0];
+						uCol = col + dir[1];
+						if(checkBounds(uRow, uCol) && state[uRow][uCol] == '.') {
+							StringBuilder sb = new StringBuilder();
+							char oplay = (uplay == youplay ? otherplay: youplay);
+							for(int[] oDir: dirs) {
+								oRow = uRow + oDir[0];
+								oCol = uCol + oDir[1];
+								if(checkBounds(oRow, oCol) && state[oRow][oCol] == oplay) {
+									if(sb.length() == 0) {
+										char uColIdx = (char) (uCol + 'A');
+										sb.append("Raid " + uColIdx + (uRow+1));
+									}
+									char oColIdx = (char) (oCol + 'A');
+									sb.append(" " + oColIdx + (oRow+1));
+								}
+							}
+							if(sb.length() != 0) {
+								sb.append(" " + uplay);
+								raidMoves.add(sb.toString());
+							}
+						}
+					}
+				}
+			}
+		}
+		// brute force all stake moves
+		if(this.processRate < 0.35) {
+			stakeMoves.addAll(raidMoves);
+			return stakeMoves;
+		} 
+		raidMoves.addAll(stakeMoves);
+		
+		return raidMoves;
 	}
 	
 	private boolean checkBounds(int uRow, int uCol) {
@@ -176,9 +241,14 @@ public class Game {
 		return util;
 	}
 	
-	private String interactivePruning() {
-		depthLimit = 3;
-		// if(processRate < 0.5) depthLimit--;
+	private String competitionAlphaBeta() {
+		depthLimit = 0;
+		while(moveRemain > 3 && branchLimit/moveRemain > 1  ) {
+			branchLimit /= moveRemain;
+			depthLimit++;
+		}
+		if(moveRemain <= 3) depthLimit = 3;
+		System.out.println("depth Limit is "+ depthLimit);
 		char[][] state = this.initState;
 		int depth = 0;
 		int v = Integer.MIN_VALUE;
@@ -186,14 +256,38 @@ public class Game {
 		String ma = null;
 		int alpha = Integer.MIN_VALUE;
 		int beta = Integer.MAX_VALUE;
-		for(String a:actions(state, youplay)) {
+		for(String a:actionsCmp(state, youplay)) {
 			ov = v;
-			v = Math.max(v, minValue(result(state, a), depth, alpha, beta));
+			v = Math.max(v, minValueCmp(result(state, a), depth, alpha, beta));
 			if(v > ov) ma = a;
 			if(v >= beta) return a;
 			alpha = Math.max(alpha, v);
 		}
 		return ma;
+	}
+	
+	private int maxValueCmp(char[][] state, int depth, int alpha, int beta) {
+		depth++;
+		if(cutOffTest(state, depth)) return utility(state);
+		int v = Integer.MIN_VALUE;
+		for(String a:actionsCmp(state, youplay)) {
+			v = Math.max(v, minValueCmp(result(state,a), depth, alpha, beta));
+			if(v >= beta) return v;
+			alpha = Math.max(alpha, v);
+		}
+		return v;
+	}
+
+	private int minValueCmp(char[][] state, int depth, int alpha, int beta) {
+		depth++;
+		if(cutOffTest(state, depth)) return utility(state);
+		int v = Integer.MAX_VALUE;
+		for(String a: actionsCmp(state, otherplay)) {
+			v = Math.min(v, maxValueCmp(result(state,a), depth, alpha, beta));
+			if(v <= alpha) return v;
+			beta = Math.min(beta, v);
+		}
+		return v;
 	}
 	
 	private String alphaBetaSearch() {
@@ -258,7 +352,7 @@ public class Game {
 		} else if(mode.equals("ALPHABETA")) {
 			action = alphaBetaSearch();
 		} else if(mode.equals("COMPETITION")) {
-			action = interactivePruning();
+			action = competitionAlphaBeta();
 		}
 		if(action == null) return null;
 		String[] actionArr = action.split(" ");

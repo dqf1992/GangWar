@@ -12,7 +12,7 @@ problemType = ["COMPETITION"]
 player = ["X","O"]
 possibleMoves = [".","X","O"]
 cellValue = 99
-numberOfTestCases = 5
+numberOfTestCases = 10
 
 #expected output generator
 class TestAI(unittest.TestCase):

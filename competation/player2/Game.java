@@ -180,8 +180,11 @@ public class Game {
 		return util;
 	}
 	
-	private String interactivePruning() {
+	private String competitionAlphaBeta() {
 		depthLimit = 3;
+		if(processRate < 0.5){
+			depthLimit = 2;
+		}
 		char[][] state = this.initState;
 		int depth = 0;
 		int v = Integer.MIN_VALUE;
@@ -261,7 +264,7 @@ public class Game {
 		} else if(mode.equals("ALPHABETA")) {
 			action = alphaBetaSearch();
 		} else if(mode.equals("COMPETITION")) {
-			action = interactivePruning();
+			action = competitionAlphaBeta();
 		}
 		if(action == null) return null;
 		String[] actionArr = action.split(" ");
